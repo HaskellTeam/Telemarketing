@@ -13,4 +13,10 @@ public abstract class Person extends Agent {
 		return this.humour;
 	}
 
+	
+	public boolean canDo() {
+		Double chance = Math.random();
+		
+		return chance <= this.getHumour().getHumourLevel();
+	}
 }

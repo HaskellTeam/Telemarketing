@@ -14,6 +14,13 @@ public class Attendant extends Person {
 	}
 	
 	
+	protected void setup() {
+		System.out.println("Pronto para atender!");
+		
+		this.addBehaviour(new PickUpCall());	
+	}
+	
+	
 	private class PickUpCall extends CyclicBehaviour {
 		Person thisAttendant = (Attendant) myAgent;
 		
@@ -27,10 +34,10 @@ public class Attendant extends Person {
 				ACLMessage reply =  msg.createReply();
 				
 				// chance of picking up the call
-				boolean didPickUp = canDo();
+				boolean didPickUp = thisAttendant.canDo();
 				// if picked up
 				if (didPickUp) {
-					boolean didSolveProblem = canDo();
+					boolean didSolveProblem = thisAttendant.canDo();
 					
 					// inform if could solve the problem
 					reply.setPerformative(ACLMessage.INFORM);
@@ -56,13 +63,6 @@ public class Attendant extends Person {
 			
 			
 		}
-		
-		private boolean canDo() {
-			Double chance = Math.random();
-			
-			return chance <= thisAttendant.getHumour().getHumourLevel();
-		}
-		
 	}
 	
 }
