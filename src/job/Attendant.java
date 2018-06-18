@@ -1,6 +1,10 @@
 package job;
 
 import jade.core.behaviours.CyclicBehaviour;
+import jade.domain.DFService;
+import jade.domain.FIPAException;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import person.Person;
 
@@ -13,23 +17,48 @@ public class Attendant extends Person {
 		super();
 	}
 	
-	
 	protected void setup() {
 		System.out.println("Pronto para atender!");
+		this.registerToDF();
 		
 		this.addBehaviour(new PickUpCall());	
 	}
 	
+	private void registerToDF() {
+		String serviceName = "unknown";
+	  	
+	  	// Read the name of the service to register as an argument
+	  	Object[] args = getArguments();
+	  	if (args != null && args.length > 0) {
+	  		serviceName = (String) args[0];
+	  	}
+	  	
+		try {
+	  		DFAgentDescription dfd = new DFAgentDescription();
+	  		dfd.setName(getAID());
+	  		ServiceDescription sd = new ServiceDescription();
+	  		sd.setName(serviceName);
+	  		sd.setType("attendant");
+	  		dfd.addServices(sd);
+	  		
+	  		DFService.register(this, dfd);
+	  	}
+	  	catch (FIPAException fe) {
+	  		fe.printStackTrace();
+	  	}
+	}
 	
 	private class PickUpCall extends CyclicBehaviour {
-		Person thisAttendant = (Attendant) myAgent;
+		Person thisAttendant;
 		
 		@Override
 		public void action() {
+			this.thisAttendant = (Attendant) myAgent;
 			// receiving the message
 			ACLMessage msg = receive();
 			
 			if (msg != null) {
+				System.out.println("RECEBIIII");
 				// replying message if not null
 				ACLMessage reply =  msg.createReply();
 				
@@ -47,6 +76,7 @@ public class Attendant extends Person {
 					thisAttendant.getHumour().decreaseHumourLevel();
 				// if not
 				} else {
+					System.out.println("UEEEEEEEE :(");
 					// just refuse the call
 					reply.setPerformative(ACLMessage.REFUSE);
 					// and answer NOTHING MUAHAHA
@@ -57,9 +87,7 @@ public class Attendant extends Person {
 				}
 				
 				send(reply);
-			} else {
-				block();
-			}
+			} else {/*do nothing*/}
 			
 			
 		}
